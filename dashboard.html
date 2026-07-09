@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FLAME - Dashboard</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #0a0a0a;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .panel {
+            background: #111;
+            border: 2px solid #ff0044;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 0 50px rgba(255,0,68,0.1);
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #222;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .header h1 { color: #ff0044; font-size: 24px; letter-spacing: 2px; }
+        .header .user { color: #888; font-size: 12px; }
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .stat-card {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-card .label { color: #666; font-size: 10px; }
+        .stat-card .value { color: #00ff88; font-size: 28px; font-weight: bold; }
+        .stat-card .sub { color: #444; font-size: 9px; margin-top: 5px; }
+        .section {
+            background: #0a0a0a;
+            border: 1px solid #222;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .section-title { color: #ff0044; font-size: 14px; margin-bottom: 15px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #222; padding: 10px; text-align: left; font-size: 12px; color: #888; }
+        th { color: #ff0044; background: #0a0a0a; }
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 10px;
+            font-size: 9px;
+        }
+        .badge-active { background: #003322; color: #00ff88; border: 1px solid #00ff88; }
+        .badge-expired { background: #330011; color: #ff0044; border: 1px solid #ff0044; }
+        .footer { text-align: center; color: #333; font-size: 10px; margin-top: 20px; padding-top: 15px; border-top: 1px solid #222; }
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+<div class="panel">
+<div class="header">
+    <div><h1>🔥 FLAME</h1><div class="user">Welcome back, <span id="usernameDisplay">FLAME</span> | <span id="roleDisplay">Owner</span></div></div>
+    <div><span class="badge badge-active">● SYSTEM ONLINE</span></div>
+</div>
+
+<div class="stats-row">
+    <div class="stat-card"><div class="label">TOTAL KEYS</div><div class="value" id="totalKeys">0</div><div class="sub">Generated</div></div>
+    <div class="stat-card"><div class="label">ACTIVE KEYS</div><div class="value" id="activeKeys">0</div><div class="sub">Valid</div></div>
+    <div class="stat-card"><div class="label">TOTAL ATTACKS</div><div class="value" id="totalAttacks">0</div><div class="sub">Sent</div></div>
+    <div class="stat-card"><div class="label">ACCOUNT BALANCE</div><div class="value" id="accountBalance">∞</div><div class="sub">Credits</div></div>
+</div>
+
+<div class="section">
+    <div class="section-title">📋 Registration History</div>
+    <div style="overflow-x:auto;">
+    <table><thead><tr><th>ID</th><th>KEY</th><th>TARGET</th><th>DURATION</th><th>DEVICES</th><th>USED</th><th>STATUS</th><th>TIME</th></tr></thead>
+    <tbody id="historyBody"><tr><td colspan="8" style="text-align:center;color:#444;">No history</td></tr></tbody></table>
+    </div>
+</div>
+
+<div class="footer">© 2026 FLAME · All Rights Reserved</div>
+</div>
+</div>
+
+<script>
+const keysData = JSON.parse(localStorage.getItem('keysData') || '{"keys":{}}');
+const history = JSON.parse(localStorage.getItem('history') || '[]');
+const attackLogs = JSON.parse(localStorage.getItem('attackLogs') || '[]');
+
+function renderHistory() {
+    const tbody = document.getElementById('historyBody');
+    if (history.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#444;">No history</td></tr>';
+        return;
+    }
+    tbody.innerHTML = history.slice(0, 15).map((h, i) => {
+        const usedCount = h.usedDevices ? Object.keys(h.usedDevices).length : 0;
+        return `<tr>
+            <td>#${38125900 + i}</td>
+            <td><code>${h.key.substring(0, 12)}***</code></td>
+            <td>${h.server || 'PUBG'}</td>
+            <td>${h.duration}</td>
+            <td>${h.devices || 1}</td>
+            <td>${usedCount}/${h.devices || 1}</td>
+            <td><span class="badge badge-active">Active</span></td>
+            <td>${h.time}</td>
+        </tr>`;
+    }).join('');
+}
+
+function updateStats() {
+    const keys = Object.keys(keysData.keys || {});
+    let active = 0;
+    keys.forEach(k => { if (keysData.keys[k].valid && new Date(keysData.keys[k].expiry) > new Date()) active++; });
+    document.getElementById('totalKeys').textContent = keys.length;
+    document.getElementById('activeKeys').textContent = active;
+    document.getElementById('totalAttacks').textContent = attackLogs.length;
+}
+
+renderHistory();
+updateStats();
+</script>
+</body>
+</html>
